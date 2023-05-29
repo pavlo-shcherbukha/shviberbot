@@ -1,0 +1,33 @@
+{
+    "version": 1,
+    "bot_token": {
+        "searchPatterns": [
+            "env:bot_token",
+            "file:/server/localdev-config.json:$.bot_token"
+        ]
+    },
+    "bot_uri": {
+        "searchPatterns": [
+            "env:bot_uri",
+            "file:/server/localdev-config.json:$.bot_uri"
+        ]
+    },
+    "bot_name": {
+        "searchPatterns": [
+            "env:bot_name",
+            "file:/server/localdev-config.json:$.bot_name"
+        ]
+    },
+    "bot_expose_domain": {
+        "searchPatterns": [
+            "env:bot_expose_domain",
+            "file:/server/localdev-config.json:$.bot_expose_domain"
+        ]
+    },
+    "bot_expose_uri_path": {
+        "searchPatterns": [
+            "env:bot_expose_uri_path",
+            "file:/server/localdev-config.json:$.bot_expose_uri_path"
+        ]
+    }
+}
