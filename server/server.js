@@ -119,6 +119,21 @@ app.post('/api/webhook',  function(req, res) {
 });
 
 
+app.get('/',  function(req, res) {
+  var filePath = path.join(__dirname, '../public/index.html');
+  res.header('Content-Type', 'text/html');
+  res.sendFile(  filePath , function(err){
+     console.log("ERRRRROOOORRRR: " + err.message);
+  });
+
+});
+
+app.get('/health',  function(req, res) {
+  let cas={ok: true};
+  return res.status(200).json( cas );
+
+});
+
 app.get('/api/webhook',  function(req, res) {
   label='http-get:api-webhook' 
   try {
@@ -154,11 +169,12 @@ if(!module.parent){
     applog.info( 'SERVER HAS STARTED',label);
     applog.info( `LISTENING  PORT= ${port} on HOST ${ ( typeof process.env.HOSTNAME === "undefined") ? 'localhost' :  process.env.HOSTNAME}`,label);
   
+    /*
     bot.setWebhook(bot_expose_domain + bot_expose_uri_path).catch(error => {
       logger.debug(`Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error}`);
       process.exit(1);
     });
-
+    */
 
   });
 }
