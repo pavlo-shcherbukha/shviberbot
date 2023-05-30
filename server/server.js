@@ -169,12 +169,12 @@ if(!module.parent){
     applog.info( 'SERVER HAS STARTED',label);
     applog.info( `LISTENING  PORT= ${port} on HOST ${ ( typeof process.env.HOSTNAME === "undefined") ? 'localhost' :  process.env.HOSTNAME}`,label);
   
-    /*
+    
     bot.setWebhook(bot_expose_domain + bot_expose_uri_path).catch(error => {
       logger.debug(`Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error}`);
       process.exit(1);
     });
-    */
+    
 
   });
 }
