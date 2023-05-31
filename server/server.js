@@ -94,9 +94,9 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
 });
 
 // Bind the bot middleware to the app instance
-app.use(bot_expose_uri_path, bot.middleware());
+//app.use(bot_expose_uri_path, bot.middleware());
 
-/*
+
 app.post('/api/webhook',  function(req, res) {
   label='http-post:api-webhook' 
   try {
@@ -117,7 +117,7 @@ app.post('/api/webhook',  function(req, res) {
 
 
 });
-*/
+
 
 app.get('/',  function(req, res) {
   var filePath = path.join(__dirname, '../public/index.html');
@@ -170,11 +170,13 @@ if(!module.parent){
     applog.info( 'SERVER HAS STARTED',label);
     applog.info( `LISTENING  PORT= ${port} on HOST ${ ( typeof process.env.HOSTNAME === "undefined") ? 'localhost' :  process.env.HOSTNAME}`,label);
   
-    
-    bot.setWebhook(bot_expose_domain + bot_expose_uri_path).catch(error => {
-      logger.debug(`Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error}`);
+    /*
+    bot.setWebhook(bot_expose_domain + bot_expose_uri_path)
+    .catch(error => {
+      logger.debug(`Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error.message}`);
       process.exit(1);
-    });
+    });*/
+    
     
 
   });
