@@ -97,7 +97,7 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
 app.use(bot_expose_uri_path, bot.middleware());
 
 
-app.post('/api2/webhook',  function(req, res) {
+app.post('/api/webhook',  function(req, res) {
   label='http-post:api-webhook' 
   try {
     
@@ -134,17 +134,22 @@ app.get('/health',  function(req, res) {
 
 });
 
-/*
-app.get('/api/webhook',  function(req, res) {
-  label='http-get:api-webhook' 
+
+app.post('/api/setwh',  function(req, res) {
+  label='http-get:api-setwh' 
   try {
     
-    var bot=request = req.body ;
-    applog.info( `Reqbody: ` + JSON.stringify(req.body)  ,label);
-    let cas={ok: true}
-    applog.info( `Saved. Return result ` + JSON.stringify(cas)  ,label);
-    return res.status(200).json( cas );
-           
+    bot.setWebhook(bot_expose_domain + bot_expose_uri_path)
+    .then(result=>{
+      applog.info( `Saved. Return result ` + JSON.stringify( result )  ,label);
+      return res.status(200).json( {ok: true, result: result} );
+    })
+    .catch(error => {
+      applog.error( `Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error.message}`  ,label);
+      errresp=applib.HttpErrorResponse(err)
+      applog.error( `Result with error! ${errresp.Error.statusCode} ` + JSON.stringify( errresp ), label);
+      return res.status(errresp.Error.statusCode ).json(errresp);
+    });
   }
   catch (err)  {
       applog.error( `Regestration error! ${err.message} `   ,label);
@@ -155,7 +160,7 @@ app.get('/api/webhook',  function(req, res) {
 
 
 });
-*/
+
 
 
 /*=====================================================================*/
@@ -171,11 +176,7 @@ if(!module.parent){
     applog.info( `LISTENING  PORT= ${port} on HOST ${ ( typeof process.env.HOSTNAME === "undefined") ? 'localhost' :  process.env.HOSTNAME}`,label);
   
     
-    bot.setWebhook(bot_expose_domain + bot_expose_uri_path)
-    .catch(error => {
-      logger.debug(`Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error.message}`);
-      process.exit(1);
-    });
+
     
     
 
