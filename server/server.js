@@ -96,7 +96,7 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
 // Bind the bot middleware to the app instance
 app.use(bot_expose_uri_path, bot.middleware());
 
-
+/*
 app.post('/api/webhook',  function(req, res) {
   label='http-post:api-webhook' 
   try {
@@ -117,7 +117,7 @@ app.post('/api/webhook',  function(req, res) {
 
 
 });
-
+*/
 
 app.get('/',  function(req, res) {
   var filePath = path.join(__dirname, '../public/index.html');
