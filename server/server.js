@@ -137,9 +137,13 @@ app.get('/health',  function(req, res) {
 
 app.post('/api/setwh',  function(req, res) {
   label='http-get:api-setwh' 
+  let bot_webhook = req.body.whook 
+  applog.info( `bot_webhook:  ${bot_webhook}`   ,label);
+
   try {
     
-    bot.setWebhook(bot_expose_domain + bot_expose_uri_path)
+    //bot.setWebhook(bot_expose_domain + bot_expose_uri_path)
+    bot.setWebhook(bot_webhook)
     .then(result=>{
       applog.info( `Saved. Return result ` + JSON.stringify( result )  ,label);
       return res.status(200).json( {ok: true, result: result} );
