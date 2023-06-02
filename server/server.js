@@ -96,13 +96,14 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
 // Bind the bot middleware to the app instance
 app.use(bot_expose_uri_path, bot.middleware());
 
-/*
-app.post('/api/webhook',  function(req, res) {
-  label='http-post:api-webhook' 
+
+app.post('/api/sendmsg',  function(req, res) {
+  label='http-post:api-sendmsg' 
   try {
     
-    var bot=request = req.body ;
+    var botmsg=request = req.body.msg ;
     applog.info( `Reqbody: ` + JSON.stringify(req.body)  ,label);
+    bot.send
     let cas={ok: true}
     applog.info( `Saved. Return result ` + JSON.stringify(cas)  ,label);
     return res.status(200).json( cas );
@@ -117,7 +118,7 @@ app.post('/api/webhook',  function(req, res) {
 
 
 });
-*/
+
 
 app.get('/',  function(req, res) {
   var filePath = path.join(__dirname, '../public/index.html');
@@ -166,7 +167,7 @@ app.post('/api/setwh',  function(req, res) {
 
 });
 
-
+iwh='https://sh-viberbot-be.12wrmp9aqvrk.eu-gb.codeengine.appdomain.cloud/api/webhook';
 
 /*=====================================================================*/
 
@@ -177,10 +178,18 @@ if(!module.parent){
 
   server.listen(port, function(){
 
-    applog.info( 'SERVER HAS STARTED',label);
-    applog.info( `LISTENING  PORT= ${port} on HOST ${ ( typeof process.env.HOSTNAME === "undefined") ? 'localhost' :  process.env.HOSTNAME}`,label);
-  
-    
+    console.log("=================================================================================")  ;  
+    console.log("SET WEB HOOK^^^^^ " +iwh);
+    bot.setWebhook(iwh)
+    .then(result=>{
+       console.log("!!!!!!----YYYYYYYYYYYYYY---");
+    })
+    .catch(error => {
+        console.log("!!!!!!----EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE---");
+        console.log("error:" + error.message);
+        console.log("=====================================================================");
+
+    });
 
     
     
