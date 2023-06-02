@@ -138,7 +138,7 @@ app.get('/health',  function(req, res) {
 app.post('/api/setwh',  function(req, res) {
   label='http-get:api-setwh' 
   let bot_webhook = req.body.whook 
-  applog.info( `bot_webhook:  ${bot_webhook}`   ,label);
+  applog.info( `bot_webhook:  ${bot_webhook}` ,label);
 
   try {
     
@@ -149,8 +149,9 @@ app.post('/api/setwh',  function(req, res) {
       return res.status(200).json( {ok: true, result: result} );
     })
     .catch(error => {
-      applog.error( `Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error.message}`  ,label);
-      errresp=applib.HttpErrorResponse(err)
+      //applog.error( `Error: The webhook ${bot_expose_domain + bot_expose_uri_path} cannot be set. ${error.message}`  ,label);
+      applog.error( `Error: The webhook ${bot_webhook} cannot be set. ${error.message}`  ,label);
+      errresp=applib.HttpErrorResponse(error)
       applog.error( `Result with error! ${errresp.Error.statusCode} ` + JSON.stringify( errresp ), label);
       return res.status(errresp.Error.statusCode ).json(errresp);
     });
