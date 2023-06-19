@@ -51,7 +51,7 @@
     const parms = new URLSearchParams(srch);
     //alert( `url prameter ${parms.get("id")} `)
     let usrid=parms.get("id") 
-    fetch(`https://a989-46-118-231-225.ngrok-free.app/api/userp?id=${usrid}`, { method: "GET"})
+    fetch(`https://sh-viberbot-be.12wrmp9aqvrk.eu-gb.codeengine.appdomain.cloud?id=${usrid}`, { method: "GET"})
     .then(res => {
       return res.json()
     })
