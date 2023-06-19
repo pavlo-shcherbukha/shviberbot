@@ -1,5 +1,6 @@
 const http = require('http');
 const express = require('express');
+const { json } = require('express');
 const winston = require('./config/winston');
 var morgan = require('morgan');
 const path = require('path');
@@ -10,6 +11,10 @@ var logger = winston ;
 const ViberBot = require('viber-bot').Bot;
 const BotEvents = require('viber-bot').Events;
 const TextMessage = require('viber-bot').Message.Text;
+const UrlMessage  = require('viber-bot').Message.Url;
+const PictureMessage = require('viber-bot').Message.Picture;
+const RichMediaMessage = require('viber-bot').Message.RichMedia;
+const KeyboardMessage = require('viber-bot').Message.Keyboard;
 
 const { LogContext,  AppLogger } = require('./config/logcontext');
 var logctx= new LogContext();
@@ -46,19 +51,18 @@ bot_expose_uri_path=IBMCloudEnv.getString('bot_expose_uri_path');
 //app.set('view engine', 'pug');
 
 // Add your code here
-const port =  process.env.SHAPPDB_SERVICE_PORT  || localConfig.port;
+const port =  process.env.SERVICE_PORT  || localConfig.port;
 
-//cookieParser    = require('cookie-parser'),
-//session         = require('express-session'),
+cookieParser    = require('cookie-parser'),
+session         = require('express-session'),
 //bodyParser      = require('body-parser');
+query           = require('querystring');
 
-//query           = require('querystring');
-
-//app.use(cookieParser());
+app.use(cookieParser());
 //app.use(bodyParser.urlencoded({extended: false}));
 //app.use(bodyParser.json());
 
-/*
+
 app.use((req, res, next) => {
   applog.express_log_request( req, res, next);
   res.header("Access-Control-Allow-Origin", "*"); 
@@ -67,11 +71,8 @@ app.use((req, res, next) => {
   applog.express_log_response( req, res, next); 
   next();
 });
-*/
-
 
 /*=====================================================================*/
-
 
 const apperror = require('./error/appError');
 const applib = require('./applib/apputils');
@@ -79,40 +80,21 @@ const { exit } = require('process');
 
 
 
-
-
-/*
-app.post('/api/sendmsg',  function(req, res) {
-  label='http-post:api-sendmsg' 
-  try {
-    
-    var botmsg=request = req.body.msg ;
-    applog.info( `Reqbody: ` + JSON.stringify(req.body)  ,label);
-    bot.send
-    let cas={ok: true}
-    applog.info( `Saved. Return result ` + JSON.stringify(cas)  ,label);
-    return res.status(200).json( cas );
-           
-  }
-  catch (err)  {
-      applog.error( `Regestration error! ${err.message} `   ,label);
-      errresp=applib.HttpErrorResponse(err)
-      applog.error( `Result with error! ${errresp.Error.statusCode} ` + JSON.stringify( errresp )   ,label);
-      return res.status(errresp.Error.statusCode ).json(errresp);
-  };
-
-
-});
-*/
-/*
 app.get('/',  function(req, res) {
   var filePath = path.join(__dirname, '../public/index.html');
   res.header('Content-Type', 'text/html');
   res.sendFile(  filePath , function(err){
-     console.log("ERRRRROOOORRRR: " + err.message);
+    if (err){
+      applog.info(`Error rendering index.html: ${err.message}`);
+      return res.status(500).end();
+    } else {
+      return res.status(200).end(); 
+    }
+
   });
 
-});*/
+});
+
 
 app.get('/health',  function(req, res) {
   let cas={ok: true};
@@ -120,17 +102,8 @@ app.get('/health',  function(req, res) {
 
 });
 
-
-
-
-const { json } = require('express');
-app.post('/api/wtest', json(), function(req, res, next) {
-  label='http-get:api-twtest' 
-  let bot_webhookb = req.body 
-  applog.info( `bot_webhook: ` + JSON.stringify(req.body) ,label);
-  return res.status(200 ).json({ok: true});
-});  
-
+ 
+let bot_users=[];
 
 const bot = new ViberBot({
   logger: applog,
@@ -145,64 +118,153 @@ bot.on(BotEvents.SUBSCRIBED, response => {
 
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
+  bot_users.push(response.userProfile);
+  applog.info( `--------------->UserProfile: ` + JSON.stringify(response.userProfile) ,label);
   response.send(new TextMessage(`I have received the following message: ${message.text}`));
 });
-
 
 // The user will get those messages on first registration
 bot.onSubscribe(response => {
   say(response, `Hi there ${response.userProfile.name}. I am ${bot.name}! Feel free to ask me if a web site is down for everyone or just you. Just send me a name of a website and I'll do the rest!`);
 });
 
-
-
 bot.onTextMessage(/./, (message, response) => {
-   
     response.send(new TextMessage(  'I am Bot. I send you response!!!  Your message is[' + message.text + ']' ))
     return;
-
 });
 
+
+bot.onConversationStarted((userProfile, isSubscribed, context) => {
+    applog.info( `--------------->UserProfile: ` + JSON.stringify(userProfile) ,label);
+    applog.info( `--------------->isSubscribed: ` + JSON.stringify(isSubscribed) ,label);
+    bot.sendMessage(userProfile,message)
+});
 
 
 // Bind the bot middleware to the app instance
 app.use(bot_expose_uri_path, bot.middleware());
 
+//iwh='https://f0b0-46-118-231-225.ngrok-free.app/api/webhook';
+iwh=`${bot_expose_domain}${bot_expose_uri_path}`
 
-iwh='https://f0b0-46-118-231-225.ngrok-free.app/api/webhook';
-
-/*=====================================================================*/
-
-/** Right call listen 
- *  in include possibilisty to run application from mocha
-*/
 const server = http.createServer(app);
+
+app.post('/api/wtest', json(), function(req, res, next) {
+  label='http-get:api-twtest' 
+  let bot_webhookb = req.body 
+  applog.info( `bot_webhook: ` + JSON.stringify(req.body) ,label);
+  return res.status(200 ).json({ok: true});
+
+});
+
+/**
+{
+    "userProfile": {
+        "id": "3Dou2U1CxfOwDczVnnjpbg==",
+        "name": "Pavlo Shcherbukha",
+        "avatar": null,
+        "country": "UA",
+        "language": "uk-UA",
+        "apiVersion": 10
+    },
+    "messages": {
+        "TextMessage": {
+            "text": "Це моє комплексне повідомлення!"
+        },
+        "UrlMessage": {
+            "url": "https://pavlo-shcherbukha.github.io/"
+        },
+        "PictureMessage": {
+            "url": "https://pavlo-shcherbukha.github.io/assets/img/mems/it-and-coffe.jpg",
+            "text": "picture text "
+        },
+        "KeyboardMessage": {
+            "Type": "keyboard",
+            "Revision": 1,
+            "Buttons": [
+                {
+                    "Columns": 3,
+                    "Rows": 2,
+                    "BgColor": "#e6f5ff",
+                    "BgMedia": "http://www.jqueryscript.net/images/Simplest-Responsive-jQuery-Image-Lightbox-Plugin-simple-lightbox.jpg",
+                    "BgMediaType": "picture",
+                    "BgLoop": true,
+                    "ActionType": "reply",
+                    "ActionBody": "Yes"
+                }
+            ]
+        }
+    }
+}
+ * 
+ */
+app.post('/api/sendmsg', json(), function(req, res, next) {
+  label='http-get:api-sendmsg' 
+  //let bot = req.body 
+  applog.info( `input request: ${JSON.stringify(req.body)} `   ,label);
+  bot.getBotProfile()
+  .then(response => {
+      let botname=response.name;
+      let username=req.body.userProfile.name
+      let text=`From ${botname} TO ${username}: відправляю повідомлення--->>>>`
+      let msglist=[];
+      
+      msglist.push( new TextMessage( text )) ;
+      if ( req.body.messages.hasOwnProperty( "TextMessage" )){
+        msglist.push( new TextMessage( req.body.messages.TextMessage.text )) ;
+      }
+      if (req.body.messages.hasOwnProperty( "UrlMessage" )){
+        msglist.push( new UrlMessage(req.body.messages.UrlMessage.url)) ;
+      }
+      if (req.body.messages.hasOwnProperty("PictureMessage")){  
+        msglist.push( new PictureMessage(  req.body.messages.PictureMessage.url, req.body.messages.PictureMessage.text));
+      }  
+
+      if (req.body.messages.hasOwnProperty( "KeyboardMessage")){ 
+        msglist.push( new KeyboardMessage( req.body.messages.KeyboardMessage ))
+      }
+
+      if (req.body.messages.hasOwnProperty(RichMediaMessage) ){ 
+        msglist.push( new RichMediaMessage ( req.body.messages.RichMediaMessage  ))
+      }
+
+
+
+      bot.sendMessage( req.body.userProfile,  msglist );    
+      applog.info( `Message sent `   ,label);
+      return res.status(200 ).json({ok: true});
+   });
+
+  
+});
+
+app.get('/api/users', function(req, res, next) {
+  
+  return res.status(200 ).json({ users_profiles:  bot_users});
+
+});
+
 
 if(!module.parent){ 
 
   
   server.listen(port, function(){
+      applog.info("=================================================================================");
+      applog.info(`Встановлюю web hook: ${iwh} `)
+      applog.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+      bot.setWebhook(iwh)
+      .then(result=>{
+        applog.info(`YES-YES-YES-YES-YES-YES-ВСТАНОВЛЕНО УСПІШНО: ${ JSON.stringify( result )}`);
+      })
+      .catch(error => {
+          applog.error(`Error setup viber webhook  ${JSON.stringify(error)}` );
+          if ( !typeof error.message === "undefined"){
+              applog.error("Error message:" + error.message);
+          }
+          
+          applog.error("=====================================================================");
 
-    console.log("=================================================================================")  ;  
-    
-    console.log("SET WEB HOOK^^^^^ " +iwh);
-    
-    bot.setWebhook(iwh)
-    .then(result=>{
-       console.log("!!!!!!----YYYYYYYYYYYYYY---");
-    })
-    .catch(error => {
-        console.log("!!!!!!----EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE---");
-        console.log("error:" + error.message);
-        console.log("=====================================================================");
-
+      });
     });
-
-    
-    
-
-  });
 }
-
-
 module.exports = server;
