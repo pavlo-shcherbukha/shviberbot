@@ -27,6 +27,7 @@
     "maskdata": "^1.2.2",
     "morgan": "^1.10.0",
     "querystring": "^0.2.1",
+    "socket.io": "^4.6.2",
     "viber-bot": "^1.0.18",
     "winston": "^3.9.0"
   }
