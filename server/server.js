@@ -78,7 +78,7 @@ const apperror = require('./error/appError');
 const applib = require('./applib/apputils');
 const { exit } = require('process');
 
-
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/',  function(req, res) {
   var filePath = path.join(__dirname, '../public/index.html');
@@ -117,10 +117,45 @@ bot.on(BotEvents.SUBSCRIBED, response => {
 });
 
 
+    /**
+     * Знайти сервіс в масиві зреєсрованих сервісів
+     * @param {*} service_list 
+     * @param {*} service_id 
+     * @returns 
+     */
+    function findservice( service_list, keyname ,service_id ){
+      return new Promise(function (resolve) {
+          return resolve( service_list.findIndex( (item ) => { 
+                                                                  //console.log(  '1 ' + service_id);
+                                                                  //console.log(  JSON.stringify(item));    
+                                                                  //item.service_name === service_id 
+                                                                  if (item[keyname].localeCompare(service_id ) === 0){
+                                                                      return true;
+                                                                  }
+                          }) )
+      });
+  } //findservice
+
+
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
-  bot_users.push(response.userProfile);
-  applog.info( `--------------->UserProfile: ` + JSON.stringify(response.userProfile) ,label);
-  response.send(new TextMessage(`I have received the following message: ${message.text}`));
+
+  findservice(bot_users, "id", response.userProfile.id)
+  .then( rindex =>{
+      if (rindex > 0){
+          applog.info( `Користувач уже існує ${response.userProfile.id} - ${response.userProfile.name} `, label);
+      } else {
+          applog.info( `Додаю в масив--------------->UserProfile: ` + JSON.stringify(response.userProfile.name) ,label);
+          bot_users.push(response.userProfile);
+          webuiurl=`${bot_expose_domain}/chat.html?id=${response.userProfile.id}`
+          
+          
+          response.send(  [ new TextMessage(` Для спілкування з собою перейдіть за URL, що вказано:`),
+                            new UrlMessage( webuiurl )] ); 
+      }
+      return;
+  });
+
+
 });
 
 // The user will get those messages on first registration
@@ -128,11 +163,12 @@ bot.onSubscribe(response => {
   say(response, `Hi there ${response.userProfile.name}. I am ${bot.name}! Feel free to ask me if a web site is down for everyone or just you. Just send me a name of a website and I'll do the rest!`);
 });
 
+/*
 bot.onTextMessage(/./, (message, response) => {
     response.send(new TextMessage(  'I am Bot. I send you response!!!  Your message is[' + message.text + ']' ))
     return;
 });
-
+*/
 
 bot.onConversationStarted((userProfile, isSubscribed, context) => {
     applog.info( `--------------->UserProfile: ` + JSON.stringify(userProfile) ,label);
@@ -147,7 +183,10 @@ app.use(bot_expose_uri_path, bot.middleware());
 //iwh='https://f0b0-46-118-231-225.ngrok-free.app/api/webhook';
 iwh=`${bot_expose_domain}${bot_expose_uri_path}`
 
+
 const server = http.createServer(app);
+const io = require('socket.io')(server)
+
 
 app.post('/api/wtest', json(), function(req, res, next) {
   label='http-get:api-twtest' 
@@ -239,8 +278,24 @@ app.post('/api/sendmsg', json(), function(req, res, next) {
 });
 
 app.get('/api/users', function(req, res, next) {
+ 
   
   return res.status(200 ).json({ users_profiles:  bot_users});
+
+});
+
+app.get('/api/userp', function(req, res, next) {
+    userid=req.query.id 
+    findservice(bot_users, "id", userid)
+    .then( rindex =>{
+        if (rindex >= 0){
+          return res.status(200 ).json( bot_users[rindex]);
+        } else { 
+          return res.status(200 ).json({});
+        }
+
+    });    
+    
 
 });
 
@@ -267,4 +322,66 @@ if(!module.parent){
       });
     });
 }
+
+let users = 0
+
+io.on('connection', (S) => {
+  let user = false
+
+  S.on('new message', (message, userProfile) => {
+    //if (!typeof userProfile === "undefined") {
+        bot.sendMessage( userProfile,  new TextMessage( `Користувач ${S.username} відправив пвідомлення: ${message}` ) ); 
+    //}    
+    S.broadcast.emit('new message', {
+      username: S.username,
+      message
+    })
+  })
+
+  S.on('add user', (username,  userProfile) => {
+    if (user) return
+
+    S.username = username
+    ++users
+    user = true
+    if (!typeof userProfile === "undefined") {
+        bot.sendMessage( userProfile,  new TextMessage( `Користувач ${username} підключився до чату через WebUI` ) ); 
+    }    
+    
+    S.emit('login', {
+      users
+    })
+
+    S.broadcast.emit('user joined', {
+      username: S.username,
+      users
+    })
+  })
+
+  S.on('typing', () => {
+    S.broadcast.emit('typing', {
+      username: S.username
+    })
+  })
+
+  S.on('stop typing', () => {
+    S.broadcast.emit('stop typing', {
+      username: S.username
+    })
+  })
+
+  S.on('disconnect', () => {
+    if (user) {
+      --users
+
+      S.broadcast.emit('user left', {
+        username: S.username,
+        users
+      })
+    }
+  })
+})
+
+
+
 module.exports = server;
