@@ -51,7 +51,7 @@
     const parms = new URLSearchParams(srch);
     //alert( `url prameter ${parms.get("id")} `)
     let usrid=parms.get("id") 
-    fetch(`https://sh-viberbot-be.12wrmp9aqvrk.eu-gb.codeengine.appdomain.cloud?id=${usrid}`, { method: "GET"})
+    fetch(`https://sh-viberbot-be.12wrmp9aqvrk.eu-gb.codeengine.appdomain.cloud/api/userp?id=${usrid}`, { method: "GET"})
     .then(res => {
       return res.json()
     })
