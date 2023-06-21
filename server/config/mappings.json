@@ -29,5 +29,23 @@
             "env:bot_expose_uri_path",
             "file:/server/localdev-config.json:$.bot_expose_uri_path"
         ]
+    },
+    "wa_apikey": {
+        "searchPatterns": [
+            "env:wa_apikey",
+            "file:/server/localdev-config.json:$.wa_apikey"
+        ]
+    },
+    "wa_url": {
+        "searchPatterns": [
+            "env:wa_url",
+            "file:/server/localdev-config.json:$.wa_url"
+        ]
+    },
+    "wa_version": {
+        "searchPatterns": [
+            "env:wa_version",
+            "file:/server/localdev-config.json:$.wa_version"
+        ]
     }
 }
