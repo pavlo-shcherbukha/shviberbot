@@ -1,0 +1,68 @@
+{
+	"Type": "keyboard",
+	"Buttons": [{
+		"Columns": 1,
+		"Rows": 2,
+		"ActionType": "reply",
+		"ActionBody": "lotion1",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>5.99 \u20BD</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 1,
+		"Rows": 2,
+		"ActionType": "reply",
+		"ActionBody": "lotion2",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>7.99 \u20BD</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 1,
+		"Rows": 2,
+		"ActionType": "reply",
+		"ActionBody": "lotion3",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>9.99 \u20BD</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 1,
+		"Rows": 2,
+		"ActionType": "reply",
+		"ActionBody": "lotion4",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>12.99 \u20BD</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 1,
+		"Rows": 2,
+		"ActionType": "reply",
+		"ActionBody": "lotion5",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>19.99 \u20BD</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 1,
+		"Rows": 2,
+		"ActionType": "reply",
+		"ActionBody": "lotion6",
+		"BgColor": "#e0e0e0",
+		"Text": "<br><font color=’#807b78’>23.99 \u20BD</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 6,
+		"Rows": 1,
+		"ActionType": "reply",
+		"ActionBody": "lotion_promotion",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=#ffffff>\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0HOLIDAY SEASON SPECIAL OFFERS<br>\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0GET IT NOW FOR ONLY </font><font color=#e897ad>29.99\u20BD</font>",
+		"TextHAlign": "left",
+		"TextVAlign": "middle"
+
+	}]
+}

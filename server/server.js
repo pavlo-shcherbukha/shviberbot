@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const { json } = require('express');
 const winston = require('./config/winston');
+const vbkbd = require('./config/vbkbd3.json');
 var morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
@@ -15,6 +16,7 @@ const UrlMessage  = require('viber-bot').Message.Url;
 const PictureMessage = require('viber-bot').Message.Picture;
 const RichMediaMessage = require('viber-bot').Message.RichMedia;
 const KeyboardMessage = require('viber-bot').Message.Keyboard;
+const StickerMessage = require('viber-bot').Message.Sticker;
 
 const { LogContext,  AppLogger } = require('./config/logcontext');
 var logctx= new LogContext();
@@ -29,7 +31,8 @@ const localConfig = require('./config/local.json');
 
 const app = express();
 app.set('x-powered-by', false);
-//const server = http.createServer(app);
+const wabase = require("./wa-base");
+//const wa=new wabase.BaseWatson( applog );
 
 
 app.use(morgan('combined', { stream: winston.stream }));
@@ -95,6 +98,20 @@ app.get('/',  function(req, res) {
 
 });
 
+app.get('/btn',  function(req, res) {
+  var filePath = path.join(__dirname, '../public/button.jpg');
+  res.header('Content-Type', 'image/jpg');
+  res.sendFile(  filePath , function(err){
+    if (err){
+      applog.info(`Error rendering index.html: ${err.message}`);
+      return res.status(500).end();
+    } else {
+      return res.status(200).end(); 
+    }
+
+  });
+
+});
 
 app.get('/health',  function(req, res) {
   let cas={ok: true};
@@ -129,33 +146,162 @@ bot.on(BotEvents.SUBSCRIBED, response => {
                                                                   //console.log(  '1 ' + service_id);
                                                                   //console.log(  JSON.stringify(item));    
                                                                   //item.service_name === service_id 
-                                                                  if (item[keyname].localeCompare(service_id ) === 0){
-                                                                      return true;
+                                                                  //xuserProfile.vuserProfile
+                                                                  if (item.hasOwnProperty("vuserProfile")){
+                                                                      if (item.vuserProfile[keyname].localeCompare(service_id ) === 0){
+                                                                          return true;
+                                                                      }
                                                                   }
                           }) )
       });
   } //findservice
 
+  bot.on(BotEvents.TEST_MESSAGE_RECEIVED, (message, response) => {
+    let xuserProfile={};
+    return new Promise(function (resolve, reject) {
+          findservice(bot_users, "id", response.userProfile.id)
+          .then( rindex =>{
+              if (rindex >= 0){
+                  xuserProfile=bot_users[rindex];
+                  applog.info( `Користувач уже існує ${xuserProfile.vuserProfile.id} - ${xuserProfile.vuserProfile.name} `, label);
+                  applog.info( `Сесія Watson Assistant: ${xuserProfile.wa.session}`);
+                  //return {ok: true, index: rindex} ;
+                  return { ok: false, wasession: xuserProfile.wa.session} ;
+              } else {
+                  applog.info( `Додаю в масив--------------->UserProfile: ` + JSON.stringify(response.userProfile.name) ,label);
+                  xuserProfile={
+                    vuserProfile: response.userProfile,
+                    wa: new wabase.BaseWatson( applog )
+                  }
+        
+                  bot_users.push(xuserProfile);
+                  bot_users_idx=bot_users.lastIndexOf( xuserProfile );
+                  //webuiurl=`${bot_expose_domain}/chat.html?id=${response.userProfile.id}`
+                  //response.send(  [ new TextMessage(` Для спілкування з собою перейдіть за URL, що вказано:`),
+                  //                  new UrlMessage( webuiurl )] ); 
+        
+                  //return {ok: false, index: bot_users_idx} ;
+                  return xuserProfile.wa.createSession();
+              }
+              
+          })
+          .then (result=>{
+            applog.info(`Для користувача ${xuserProfile.vuserProfile.name}  Сесія зв'язку з Watson Assistant ${JSON.stringify(result)}`);
+
+              //  перше повідомлення
+              return resolve( 
+                        response.send(  [ new TextMessage(` Ваш watson session: ${result.wasession}`), new KeyboardMessage( vbkbd )] )
+                    ); 
+ 
+          })
+          .catch( err => {
+            applog.error( `make session: [ ${err.message} ] === ` + JSON.stringify(err) ,label);
+            return reject(err)
+          });
+    });
+  });
+///======    
 
 bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
+  let xuserProfile={};
+  return new Promise(function (resolve, reject) {
+          findservice(bot_users, "id", response.userProfile.id)
+          .then( rindex =>{
+              if (rindex >= 0){
+                
 
-  findservice(bot_users, "id", response.userProfile.id)
-  .then( rindex =>{
-      if (rindex > 0){
-          applog.info( `Користувач уже існує ${response.userProfile.id} - ${response.userProfile.name} `, label);
-      } else {
-          applog.info( `Додаю в масив--------------->UserProfile: ` + JSON.stringify(response.userProfile.name) ,label);
-          bot_users.push(response.userProfile);
-          webuiurl=`${bot_expose_domain}/chat.html?id=${response.userProfile.id}`
+                  xuserProfile=bot_users[rindex];
+                  applog.info( `Користувач уже існує ${xuserProfile.vuserProfile.id} - ${xuserProfile.vuserProfile.name} `, label);
+                  applog.info( `Сесія Watson Assistant: ${xuserProfile.wa.session}`);
+
+                  return { ok: false, wasession: xuserProfile.wa.session} ;
+              } else {
+                  applog.info( `Додаю в масив--------------->UserProfile: ` + JSON.stringify(response.userProfile.name) ,label);
+                  xuserProfile={
+                    vuserProfile: response.userProfile,
+                    wa: new wabase.BaseWatson( applog )
+                  }
+
+                  bot_users.push(xuserProfile);
+                  bot_users_idx=bot_users.lastIndexOf( xuserProfile );
+
+                  return xuserProfile.wa.createSession();
+              }
+              
+          })
+          .then (result=>{
+            applog.info(`Для користувача ${xuserProfile.vuserProfile.name}  Сесія зв'язку з Watson Assistant ${JSON.stringify(result)}`);
+            if (result.ok){
+              //  перше повідомлення
+              //response.send(   new TextMessage(` Ваш watson session: ${result.wasession}`) ); 
+            // kbd=new KeyboardMessage( vbkbd );
+              //response.send(  kbd);
+              return xuserProfile.wa.sendWAMessage(result.wasession, "")
+            } else {
+              // продовжую спілкування
+              return xuserProfile.wa.sendWAMessage(result.wasession, message.text)
+            }
+            
+          })
+          .then( result=>{
+              if ( result.result.hasOwnProperty("user_id") ){
+                  // send assistant response to viber
+                  applog.info(`WAAAAA!!!!   Відповідь Watson Assistant для ${xuserProfile.vuserProfile.name} watson session ${xuserProfile.wa.session} ::::  ${JSON.stringify(result.result)}`);
+                  
+                  for (var i = 0, l = result.result.output.generic.length; i < l; i++) {
+                    var wamsg = result.result.output.generic[i];
+                    if (  wamsg.response_type.localeCompare( "text")===0){
+                      let msgs = xuserProfile.wa.TOVIBERMSG_TextToTextMessage( wamsg.text );
+                      let vmessages=[];
+                      msgtext= new TextMessage(`WA: ${msgs.text}`)
+                      vmessages.push(msgtext);
+                      for (var mi=0, ml=msgs.urlarr.length; mi<ml; mi++){
+                        msgurl = new UrlMessage(media=msgs.urlarr[mi].url);
+                        vmessages.push( msgurl );
+                      }
+                      //response.send(   new TextMessage(`WA: ${wamsg.text}`)); 
+                      return response.send(  vmessages ); 
+                    } else if( wamsg.response_type.localeCompare( "option")===0 ) {  
+                        let kbdmsg = xuserProfile.wa.TOVIBERMSG_OptionToKeyboardMessage( wamsg );
+                        let msg=new KeyboardMessage( kbdmsg)
+                        return  response.send(    msg  );
+                        //console.log("dddddd" + JSON.stringify(r1) ); 
+                    } else if (   wamsg.response_type.localeCompare(  "connect_to_agent") === 0){
+                      
+                          findservice(bot_users, "id", response.userProfile.id)
+                          .then( rindex =>{
+                              if (rindex >= 0){
+                                delete bot_users[rindex];
+                                xuserProfile={};
+                                applog.info(`Видаляю ${response.userProfile.id} - ${response.userProfile.name}`);
+                              }
+                          });    
+                        
+                            
+                    } else if ( wamsg.response_type.localeCompare(  "pause") === 0){
+                      //40132
+                      return  response.send(   new StickerMessage(sticker_id=40132));
+                    } else if ( wamsg.response_type.localeCompare(  "suggestion") === 0){
+
+                      return    response.send(   new TextMessage(`INT: Неочікуваний тип повідомлення : ${JSON.stringify(wamsg)}`)); 
           
-          
-          response.send(  [ new TextMessage(` Для спілкування з собою перейдіть за URL, що вказано:`),
-                            new UrlMessage( webuiurl )] ); 
-      }
-      return;
-  });
-
-
+                    } else {
+                        return response.send(   new TextMessage(`INT: Неочікуваний тип повідомлення : ${wamsg.response_type}`)); 
+                    }
+                  }
+              } else {
+                return response.send(   new TextMessage(`INT: WA шото не работает `)); 
+              } 
+              return {ok: true};
+          })
+          .then (result =>{
+              return resolve(result);
+          })
+          .catch( err=>{
+              applog.error( `make session: [ ${err.message} ] === ` + JSON.stringify(err) ,label);
+              return reject(err);
+          });
+    });      
 });
 
 // The user will get those messages on first registration

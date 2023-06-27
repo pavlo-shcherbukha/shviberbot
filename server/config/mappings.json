@@ -47,5 +47,11 @@
             "env:wa_version",
             "file:/server/localdev-config.json:$.wa_version"
         ]
+    }, 
+    "wa_assistantid": {
+        "searchPatterns": [
+            "env:wa_assistantid",
+            "file:/server/localdev-config.json:$.wa_assistantid"
+        ]
     }
 }
