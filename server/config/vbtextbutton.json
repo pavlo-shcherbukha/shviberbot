@@ -1,0 +1,10 @@
+	{
+		"Columns": 6,
+		"Rows": 1,
+		"ActionType": "reply",
+		"ActionBody": "lotion3",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>Кнопка-3</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}

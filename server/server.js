@@ -171,7 +171,7 @@ bot.on(BotEvents.SUBSCRIBED, response => {
                   applog.info( `Додаю в масив--------------->UserProfile: ` + JSON.stringify(response.userProfile.name) ,label);
                   xuserProfile={
                     vuserProfile: response.userProfile,
-                    wa: new wabase.BaseWatson( applog )
+                    wa: new wabase.BaseWatson( applog, TextMessage, UrlMessage, PictureMessage, KeyboardMessage, StickerMessage)
                   }
         
                   bot_users.push(xuserProfile);
@@ -244,13 +244,16 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
             
           })
           .then( result=>{
+              let vmessages=[];
               if ( result.result.hasOwnProperty("user_id") ){
                   // send assistant response to viber
                   applog.info(`WAAAAA!!!!   Відповідь Watson Assistant для ${xuserProfile.vuserProfile.name} watson session ${xuserProfile.wa.session} ::::  ${JSON.stringify(result.result)}`);
-                  
+                 
                   for (var i = 0, l = result.result.output.generic.length; i < l; i++) {
                     var wamsg = result.result.output.generic[i];
+
                     if (  wamsg.response_type.localeCompare( "text")===0){
+                      /*
                       let msgs = xuserProfile.wa.TOVIBERMSG_TextToTextMessage( wamsg.text );
                       let vmessages=[];
                       msgtext= new TextMessage(`WA: ${msgs.text}`)
@@ -260,11 +263,16 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
                         vmessages.push( msgurl );
                       }
                       //response.send(   new TextMessage(`WA: ${wamsg.text}`)); 
-                      return response.send(  vmessages ); 
+                      */
+                      let msgs=wamsg.text; 
+                      let msgtext= new TextMessage(`WA: ${msgs}`)
+                      vmessages.push( msgtext );
+
                     } else if( wamsg.response_type.localeCompare( "option")===0 ) {  
                         let kbdmsg = xuserProfile.wa.TOVIBERMSG_OptionToKeyboardMessage( wamsg );
-                        let msg=new KeyboardMessage( kbdmsg)
-                        return  response.send(    msg  );
+                        //let msg=new KeyboardMessage( kbdmsg)
+                        //return  response.send(    msg  );
+                        vmessages.push( kbdmsg );
                         //console.log("dddddd" + JSON.stringify(r1) ); 
                     } else if (   wamsg.response_type.localeCompare(  "connect_to_agent") === 0){
                       
@@ -280,19 +288,25 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
                             
                     } else if ( wamsg.response_type.localeCompare(  "pause") === 0){
                       //40132
-                      return  response.send(   new StickerMessage(sticker_id=40132));
-                    } else if ( wamsg.response_type.localeCompare(  "suggestion") === 0){
+                      vmessages.push(  new StickerMessage(sticker_id=40132) );
+                    } else if ( wamsg.response_type.localeCompare(  "date") === 0){
 
-                      return    response.send(   new TextMessage(`INT: Неочікуваний тип повідомлення : ${JSON.stringify(wamsg)}`)); 
-          
+                        vmessages.push( new TextMessage(`в форматі MM/dd/YYYY`) )
+                    } else if ( wamsg.response_type.localeCompare(  "suggestion") === 0){
+                      vmessages.push( new TextMessage(`1-INT: Неочікуваний тип повідомлення suggestion: ${JSON.stringify(wamsg)}`) )
+         
                     } else {
-                        return response.send(   new TextMessage(`INT: Неочікуваний тип повідомлення : ${wamsg.response_type}`)); 
+
+                      vmessages.push(    new TextMessage(`2-INT: Неочікуваний тип повідомлення : ${wamsg.response_type}`)); 
+                      applog.verbose(`####INT: Неочікуваний тип повідомлення : ${JSON.stringify(wamsg)}`)
                     }
                   }
               } else {
-                return response.send(   new TextMessage(`INT: WA шото не работает `)); 
+                vmessages.push( new TextMessage(`INT: WA шото не работает `))
+                
               } 
-              return {ok: true};
+              //return {ok: true};
+              return response.send( vmessages ); 
           })
           .then (result =>{
               return resolve(result);

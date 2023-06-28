@@ -3,6 +3,17 @@ const IBMCloudEnv = require('ibm-cloud-env');
 const apperror = require('./error/appError');
 const applib = require('./applib/apputils');
 
+
+const TextMessage = require('viber-bot').Message.Text;
+const UrlMessage  = require('viber-bot').Message.Url;
+const PictureMessage = require('viber-bot').Message.Picture;
+const RichMediaMessage = require('viber-bot').Message.RichMedia;
+const KeyboardMessage = require('viber-bot').Message.Keyboard;
+const StickerMessage = require('viber-bot').Message.Sticker;
+
+const vbtextButton = require("./config/vbtextbutton.json")
+const vbbuttonsList = require("./config/vbbuttonsList.json");
+
 IBMCloudEnv.init('/server/config/mappings.json');
 i_wa_apikey= IBMCloudEnv.getString('wa_apikey') ;
 i_wa_url= IBMCloudEnv.getString('wa_url') ;
@@ -17,7 +28,7 @@ const { IamAuthenticator } = require('ibm-watson/auth');
 
 
 class BaseWatson {
-    constructor(logger) {
+    constructor(logger, aTextMessage, aUrlMessage, aPictureMessage, aKeyboardMessage, aStickerMessage) {
 
       
       this.applog= logger;      
@@ -28,6 +39,12 @@ class BaseWatson {
                                           }
                                       );
       this.session=null;  
+      this.TextMessage = aTextMessage; 
+      this.UrlMessage = aUrlMessage; 
+      this.PictureMessage = aPictureMessage; 
+      this.KeyboardMessage = aKeyboardMessage; 
+      this.StickerMessage = aStickerMessage;
+
     }
 
     createSession(){
@@ -126,53 +143,22 @@ class BaseWatson {
 
     
     TOVIBERMSG_OptionToKeyboardMessage(wa_option){
-      const V_SAMPLE_KEYBOARD = {
-        "Type": "keyboard",
-        "Revision": 1,
-        "Buttons": []
-      };
-      const V_BUTTON = {
-        "Columns": 3,
-        "Rows": 2,
-        "BgColor": "#e6f5ff",
-        "BgMedia": "http://www.jqueryscript.net/images/Simplest-Responsive-jQuery-Image-Lightbox-Plugin-simple-lightbox.jpg",
-        "BgMediaType": "picture",
-        "BgLoop": true,
-        "ActionType": "reply",
-        "ActionBody": "Yes"
-      };
+      let v_kbd_list = Object.assign({}, vbbuttonsList);
+      //let v_btn=Object.assign({},  vbtextButton);
+      if (v_kbd_list.Buttons.length !== 0) {
+        v_kbd_list.Buttons=[];
+      }
 
       for (var i = 0, l = wa_option.options.length; i < l; i++) {
-
         let lopt=wa_option.options[i];
-        let v_btn1={
-          "Columns": 3,
-          "Rows": 2,
-          "BgColor": "#E1E1E1",
-          //"BgMedia": "https://img.freepik.com/free-vector/whatsapp-icon-design_23-2147900929.jpg?w=740&t=st=1687700044~exp=1687700644~hmac=4a8224f0c44ad56e5250a4592cd511f7ee224e7d6717b5c31e00d2558a22c625",
-          "BgMedia": "https://a268-46-118-231-225.ngrok-free.app/btn",
-          "BgMediaType": "picture",
-          "BgLoop": true ,         
-          "ActionType": "reply",
-          "ActionBody": lopt.value.input.text,
-          "Text": lopt.label
-        };
-        let v_btn = {
-          "Columns": 4,
-          "Rows": 3,
-          "Text": lopt.label,
-          "TextSize": "regular",
-          "TextHAlign": "left",
-          "TextVAlign": "top",
-          "ActionType": "reply",
-          "ActionBody": lopt.value.input.text,
-          "BgColor": "#f6f7f9"
-        }
-
-        V_SAMPLE_KEYBOARD.Buttons.push(v_btn);
+        let v_btn=Object.assign({},  vbtextButton);
+        v_btn.Text=lopt.label;
+        v_btn.ActionBody=lopt.value.input.text
+        v_kbd_list.Buttons.push(v_btn);
 
       }
-      return V_SAMPLE_KEYBOARD
+      let xKeyboardMessage=new KeyboardMessage(v_kbd_list);
+      return xKeyboardMessage;
 
     }
    
