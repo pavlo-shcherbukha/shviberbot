@@ -2,7 +2,7 @@ const http = require('http');
 const express = require('express');
 const { json } = require('express');
 const winston = require('./config/winston');
-const vbkbd = require('./config/vbkbd3.json');
+//const vbkbd = require('./config/vbkbd3.json');
 var morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
@@ -190,7 +190,7 @@ bot.on(BotEvents.SUBSCRIBED, response => {
 
               //  перше повідомлення
               return resolve( 
-                        response.send(  [ new TextMessage(` Ваш watson session: ${result.wasession}`), new KeyboardMessage( vbkbd )] )
+                        response.send(  [ new TextMessage(` Ваш watson session: ${result.wasession}`)/*, new KeyboardMessage( vbkbd )*/] )
                     ); 
  
           })
@@ -253,20 +253,15 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
                     var wamsg = result.result.output.generic[i];
 
                     if (  wamsg.response_type.localeCompare( "text")===0){
-                      /*
-                      let msgs = xuserProfile.wa.TOVIBERMSG_TextToTextMessage( wamsg.text );
-                      let vmessages=[];
-                      msgtext= new TextMessage(`WA: ${msgs.text}`)
-                      vmessages.push(msgtext);
-                      for (var mi=0, ml=msgs.urlarr.length; mi<ml; mi++){
-                        msgurl = new UrlMessage(media=msgs.urlarr[mi].url);
-                        vmessages.push( msgurl );
-                      }
-                      //response.send(   new TextMessage(`WA: ${wamsg.text}`)); 
-                      */
-                      let msgs=wamsg.text; 
-                      let msgtext= new TextMessage(`WA: ${msgs}`)
-                      vmessages.push( msgtext );
+                          let msgs = []
+                          msgs = xuserProfile.wa.TOVIBERMSG_TextToTextMessage( wamsg.text );
+                          for (var mi=0, ml=msgs.length; mi<ml; mi++){
+                              vmessages.push( msgs[mi] );
+                          }
+                      
+                      //let msgs=wamsg.text; 
+                      //let msgtext= new TextMessage(`WA: ${msgs}`)
+                      //vmessages.push( msgtext );
 
                     } else if( wamsg.response_type.localeCompare( "option")===0 ) {  
                         let kbdmsg = xuserProfile.wa.TOVIBERMSG_OptionToKeyboardMessage( wamsg );

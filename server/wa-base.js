@@ -113,45 +113,64 @@ class BaseWatson {
     
 
 
-    TOVIBERMSG_TextToTextMessage(wa_text){
+    TOVIBERMSG_TextToTextMessage(wa_text, ){
         let reg= /\[[^\[\]]*?\]\(.*?\)|^\[*?\]\(.*?\)/gm;
         //let reg=new RegExp("\[[^\[\]]*?\]\(.*?\)|^\[*?\]\(.*?\)", "gm");
+        let vb_msgs=[]
         let url_arr=[];
         let re_text="";
+        let v_kbd_list = Object.assign({}, vbbuttonsList);
+        if (v_kbd_list.Buttons.length !== 0) {
+          v_kbd_list.Buttons=[];
+        }
+
+  
 
         let re_str=wa_text
         let re_result=re_str.match(reg);
         if (re_result===null){
           // return only textmessage
           re_text=re_str;
+          vb_msgs.push( new TextMessage( re_str ));
+
         } else {
           for (var i = 0, l = re_result.length; i < l; i++) {
             // go 
             let re_mdurl=re_result[i];
             let re_urlvobj=this.parse_md_url(re_mdurl)
-            url_arr.push(re_urlvobj);
+
+            //url_arr.push(re_urlvobj);
+           
             re_str=re_str.replace(  reg, " " )
-            re_text=re_str;
+            vb_msgs.push( new TextMessage( re_str ));
+
+            let v_btn={};
+            v_btn=Object.assign({},  vbtextButton);
+            v_btn.ActionType='open-url';
+            v_btn.Text=`<font color="#f6f6f8">${re_urlvobj.name}</font>`;
+            v_btn.ActionBody=re_urlvobj.url;
+            v_btn.BgColor="#2323e7";
+            v_kbd_list.Buttons.push(v_btn);            
 
           }
-          
+          vb_msgs.push( new KeyboardMessage(v_kbd_list));
 
         }
-        let res={text: re_text, urlarr: url_arr};
-        return res;
+       
+        return vb_msgs;
     }      
 
     
     TOVIBERMSG_OptionToKeyboardMessage(wa_option){
       let v_kbd_list = Object.assign({}, vbbuttonsList);
-      //let v_btn=Object.assign({},  vbtextButton);
       if (v_kbd_list.Buttons.length !== 0) {
         v_kbd_list.Buttons=[];
       }
 
       for (var i = 0, l = wa_option.options.length; i < l; i++) {
         let lopt=wa_option.options[i];
-        let v_btn=Object.assign({},  vbtextButton);
+        let v_btn={};
+        v_btn=Object.assign({},  vbtextButton);
         v_btn.Text=lopt.label;
         v_btn.ActionBody=lopt.value.input.text
         v_kbd_list.Buttons.push(v_btn);
