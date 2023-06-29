@@ -8,4 +8,7 @@ credentials.json
 localdev-config.json
 *.log
 old
+mycred.md
+ibm-credentials.env
+
 

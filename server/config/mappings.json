@@ -30,6 +30,12 @@
             "file:/server/localdev-config.json:$.bot_expose_uri_path"
         ]
     },
+    "bot_operator_id": {
+        "searchPatterns": [
+            "env:bot_operator_id",
+            "file:/server/localdev-config.json:$.bot_operator_id"
+        ]
+    },
     "wa_apikey": {
         "searchPatterns": [
             "env:wa_apikey",
@@ -46,6 +52,12 @@
         "searchPatterns": [
             "env:wa_version",
             "file:/server/localdev-config.json:$.wa_version"
+        ]
+    }, 
+    "wa_assistantid": {
+        "searchPatterns": [
+            "env:wa_assistantid",
+            "file:/server/localdev-config.json:$.wa_assistantid"
         ]
     }
 }

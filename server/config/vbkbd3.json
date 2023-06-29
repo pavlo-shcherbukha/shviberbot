@@ -1,0 +1,31 @@
+{
+	"Type": "keyboard",
+	"Buttons": [{
+		"Columns": 6,
+		"Rows": 1,
+		"ActionType": "reply",
+		"ActionBody": "lotion1",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>Кнопка-1</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 6,
+		"Rows": 1,
+		"ActionType": "reply",
+		"ActionBody": "lotion2",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>Кнопка-2</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}, {
+		"Columns": 6,
+		"Rows": 1,
+		"ActionType": "reply",
+		"ActionBody": "lotion3",
+		"BgColor": "#e0e0e0",
+		"Text": "<font color=’#807b78’>Кнопка-3</font>",
+		"TextHAlign": "center",
+		"TextVAlign": "bottom"
+	}]
+}
