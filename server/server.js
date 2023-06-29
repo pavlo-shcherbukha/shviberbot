@@ -277,8 +277,8 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
                           findservice(bot_users, "id", response.userProfile.id)
                           .then( rindex =>{
                               if (rindex >= 0){
-                                //delete bot_users[rindex];
-                                //xuserProfile={};
+                                delete bot_users[rindex];
+                                xuserProfile={};
                                 applog.info(`Видаляю ${response.userProfile.id} - ${response.userProfile.name}`);
                               }
                           });    
