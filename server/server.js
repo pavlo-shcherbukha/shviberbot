@@ -47,6 +47,9 @@ bot_expose_domain=IBMCloudEnv.getString('bot_expose_domain');
 bot_expose_uri_path=IBMCloudEnv.getString('bot_expose_uri_path');
 
 
+bot_operator_id=IBMCloudEnv.getString('bot_operator_id');
+
+
 
 
 // view engine setup
@@ -97,7 +100,7 @@ app.get('/',  function(req, res) {
   });
 
 });
-
+/*
 app.get('/btn',  function(req, res) {
   var filePath = path.join(__dirname, '../public/button.jpg');
   res.header('Content-Type', 'image/jpg');
@@ -112,7 +115,7 @@ app.get('/btn',  function(req, res) {
   });
 
 });
-
+*/
 app.get('/health',  function(req, res) {
   let cas={ok: true};
   return res.status(200).json( cas );
@@ -274,8 +277,8 @@ bot.on(BotEvents.MESSAGE_RECEIVED, (message, response) => {
                           findservice(bot_users, "id", response.userProfile.id)
                           .then( rindex =>{
                               if (rindex >= 0){
-                                delete bot_users[rindex];
-                                xuserProfile={};
+                                //delete bot_users[rindex];
+                                //xuserProfile={};
                                 applog.info(`Видаляю ${response.userProfile.id} - ${response.userProfile.name}`);
                               }
                           });    
@@ -342,7 +345,7 @@ iwh=`${bot_expose_domain}${bot_expose_uri_path}`
 const server = http.createServer(app);
 const io = require('socket.io')(server)
 
-
+/*
 app.post('/api/wtest', json(), function(req, res, next) {
   label='http-get:api-twtest' 
   let bot_webhookb = req.body 
@@ -350,48 +353,7 @@ app.post('/api/wtest', json(), function(req, res, next) {
   return res.status(200 ).json({ok: true});
 
 });
-
-/**
-{
-    "userProfile": {
-        "id": "3Dou2U1CxfOwDczVnnjpbg==",
-        "name": "Pavlo Shcherbukha",
-        "avatar": null,
-        "country": "UA",
-        "language": "uk-UA",
-        "apiVersion": 10
-    },
-    "messages": {
-        "TextMessage": {
-            "text": "Це моє комплексне повідомлення!"
-        },
-        "UrlMessage": {
-            "url": "https://pavlo-shcherbukha.github.io/"
-        },
-        "PictureMessage": {
-            "url": "https://pavlo-shcherbukha.github.io/assets/img/mems/it-and-coffe.jpg",
-            "text": "picture text "
-        },
-        "KeyboardMessage": {
-            "Type": "keyboard",
-            "Revision": 1,
-            "Buttons": [
-                {
-                    "Columns": 3,
-                    "Rows": 2,
-                    "BgColor": "#e6f5ff",
-                    "BgMedia": "http://www.jqueryscript.net/images/Simplest-Responsive-jQuery-Image-Lightbox-Plugin-simple-lightbox.jpg",
-                    "BgMediaType": "picture",
-                    "BgLoop": true,
-                    "ActionType": "reply",
-                    "ActionBody": "Yes"
-                }
-            ]
-        }
-    }
-}
- * 
- */
+*/
 app.post('/api/sendmsg', json(), function(req, res, next) {
   label='http-get:api-sendmsg' 
   //let bot = req.body 
@@ -441,15 +403,32 @@ app.get('/api/users', function(req, res, next) {
 
 app.get('/api/userp', function(req, res, next) {
     userid=req.query.id 
+    /*
     findservice(bot_users, "id", userid)
     .then( rindex =>{
         if (rindex >= 0){
-          return res.status(200 ).json( bot_users[rindex]);
+          return res.status(200 ).json( bot_users[rindex].vuserProfile);
         } else { 
           return res.status(200 ).json({});
         }
 
-    });    
+    }); 
+    */
+    let userProfile={
+      "id": bot_operator_id,
+      "avatar": null,
+      "country": "UA",
+      "language": "uk-UA",
+      "apiVersion": 10
+    };
+    bot.getUserDetails(userProfile)
+    .then( result =>{
+      return res.status(200 ).json(result);
+    })
+    .catch(err=> {
+      let errres={ ok: false, errtext: err.message};
+      res.status(422 ).json(errres);
+    });   
     
 
 });

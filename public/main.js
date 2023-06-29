@@ -52,6 +52,9 @@
     //alert( `url prameter ${parms.get("id")} `)
     let usrid=parms.get("id") 
     fetch(`https://sh-viberbot-be.12wrmp9aqvrk.eu-gb.codeengine.appdomain.cloud/api/userp?id=${usrid}`, { method: "GET"})
+    //  fetch(`https://7f08-46-118-231-225.ngrok-free.app/api/userp?id=${usrid}`, { method: "GET"})
+     //fetch(`http://localhost:8080/api/userp?id=${usrid}`, { method: "GET"})
+
     .then(res => {
       return res.json()
     })
