@@ -76,9 +76,14 @@ class BaseWatson {
                                       sessionId: wasession,
                                       input: {
                                         'message_type': 'text',
-                                        'text': wamsg
-                                        }
-                                })
+                                        'text': wamsg,
+                                         options: {
+                                            return_context: true
+                                          }
+                                        }      
+                                })                                        
+                                        
+
           .then (wares=>{
               return resolve(wares);
           })  
@@ -115,6 +120,7 @@ class BaseWatson {
 
     TOVIBERMSG_TextToTextMessage(wa_text, ){
         let reg= /\[[^\[\]]*?\]\(.*?\)|^\[*?\]\(.*?\)/gm;
+        let regbr=/^(\s+<br( \/)?>)*|(<br( \/)?>\s)*$/gm;
         //let reg=new RegExp("\[[^\[\]]*?\]\(.*?\)|^\[*?\]\(.*?\)", "gm");
         let vb_msgs=[]
         let url_arr=[];
@@ -127,11 +133,12 @@ class BaseWatson {
   
 
         let re_str=wa_text
+        re_str=re_str.replace(  regbr, "" )
         let re_result=re_str.match(reg);
         if (re_result===null){
           // return only textmessage
-          re_text=re_str;
-          vb_msgs.push( new TextMessage( re_str ));
+          //re_text=re_str;
+          //vb_msgs.push( new TextMessage( re_str ));
 
         } else {
           for (var i = 0, l = re_result.length; i < l; i++) {
@@ -142,8 +149,7 @@ class BaseWatson {
             //url_arr.push(re_urlvobj);
            
             re_str=re_str.replace(  reg, " " )
-            vb_msgs.push( new TextMessage( re_str ));
-
+           
             let v_btn={};
             v_btn=Object.assign({},  vbtextButton);
             v_btn.ActionType='open-url';
@@ -153,10 +159,15 @@ class BaseWatson {
             v_kbd_list.Buttons.push(v_btn);            
 
           }
+          
+
+        }
+        vb_msgs.push( new TextMessage( re_str ));
+        if (v_kbd_list.Buttons.length > 0){
           vb_msgs.push( new KeyboardMessage(v_kbd_list));
 
         }
-       
+
         return vb_msgs;
     }      
 
